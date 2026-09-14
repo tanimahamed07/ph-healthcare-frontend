@@ -10,27 +10,26 @@ import {
   FieldLabel,
   FieldSeparator,
 } from "../ui/field";
-
+import { loginSchema } from "@/validation";
 import { useState } from "react";
 import { Eye, EyeClosed } from "lucide-react";
-import { loginSchema } from "@/validation";
-import { useGoogleOAuth, useLogin } from "@/hooks";
+import { useLogin } from "@/hooks";
 import { useRouter } from "next/navigation";
 import { toast } from "../ui/toast";
 import { Spinner } from "../ui/spinner";
-import { GoogleLogin } from "@react-oauth/google";
+import Link from "next/link";
+import GoogleLoginComponent from "../ui/layout/modules/google-login/GoogleLogin";
 
 export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
-  const { mutate: login, isPending: loginPending } = useLogin();
 
-  const { mutate: googleLogin } = useGoogleOAuth();
+  const { mutate: login, isPending: loginPending } = useLogin();
 
   const form = useForm({
     defaultValues: {
-      email: "",
-      password: "",
+      email: "superadmin@gmail.com",
+      password: "Super@admin12345",
     },
     validators: {
       onSubmit: loginSchema,
@@ -40,67 +39,27 @@ export default function LoginForm() {
         email: value.email,
         password: value.password,
       };
+
       login(loginData, {
         onSuccess: (res) => {
-          router.push("/");
           toast.add({
             title: "Login Success",
-            description: "Welcome Back",
+            description: "Welcome back",
             type: "success",
           });
+          router.push("/");
         },
         onError: (err) => {
           toast.add({
-            title: "Authorization Failure",
+            title: "Authorization failure",
             description:
-              err.message || "Something Went Wrong. Please try again",
+              err.message || "Something went wrong. Please try again",
             type: "error",
           });
         },
       });
     },
   });
-
-  const handleGoogleSuccess = (credentialResponse: { credential?: string }) => {
-    const idToken = credentialResponse.credential;
-    if (!idToken) {
-      toast.add({
-        title: "Google OAuth Failed",
-        description: "Something went wrong. Please try again",
-        type: "error",
-      });
-      return;
-    }
-
-    googleLogin(
-      { idToken },
-      {
-        onSuccess: () => {
-          toast.add({
-            title: "Logged in successfully",
-            description: "Welcome Back",
-            type: "success",
-          });
-        },
-        onError: (err) => {
-          toast.add({
-            title: "Google OAuth Failed",
-            description:
-              err.message || "Something went wrong. Please try again",
-            type: "error",
-          });
-          router.push("/");
-        },
-      },
-    );
-  };
-  const handleGoogleError = () => {
-    toast.add({
-      title: "Google OAuth Failed",
-      description: "Something went wrong. Please try again",
-      type: "error",
-    });
-  };
 
   return (
     <div className="flex flex-col gap-5">
@@ -181,20 +140,30 @@ export default function LoginForm() {
           </form.Field>
 
           <Button disabled={loginPending} type="submit">
-            {loginPending ? <Spinner></Spinner> : "Submit"}
+            {loginPending ? (
+              <>
+                <Spinner /> submitting
+              </>
+            ) : (
+              "Submit"
+            )}
           </Button>
         </FieldGroup>
       </form>
 
-      <FieldSeparator>Or</FieldSeparator>
+      <FieldSeparator>Or continue with</FieldSeparator>
 
-      <GoogleLogin
-        theme="outline"
-        shape="pill"
-        text="continue_with"
-        onSuccess={handleGoogleSuccess}
-        onError={handleGoogleError}
-      />
+      <GoogleLoginComponent />
+
+      <div className="text-center text-sm text-muted-foreground">
+        Don&apos;t have an account?{" "}
+        <Link
+          href="/register"
+          className="font-medium underline underline-offset-4 hover:text-primary"
+        >
+          Register
+        </Link>
+      </div>
     </div>
   );
 }
