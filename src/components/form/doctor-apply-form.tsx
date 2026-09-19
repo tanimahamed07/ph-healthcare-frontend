@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/a11y/noLabelWithoutControl: <explanation> */
 "use client";
 
 import { useForm } from "@tanstack/react-form";
@@ -18,7 +19,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-
+import { Button } from "@/components/ui/button";
 import {
   Field,
   FieldDescription,
@@ -29,17 +30,15 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  isAcceptedFileSize,
-  isAcceptedFileType,
+  doctorApplicationSchema,
   MAX_ADDITIONAL_FILES,
   MAX_FILE_SIZE,
 } from "@/validation";
-
 import { formatFileSize } from "@/utils";
-import { DoctorApplicationData } from "@/types";
 import { useApplyAsDoctor } from "@/hooks";
-import { Button } from "../ui/button";
 import { toast } from "../ui/toast";
+import { Spinner } from "../ui/spinner";
+import { DoctorApplicationData } from "@/types";
 
 //* Data signature
 // {
@@ -64,19 +63,37 @@ export default function DoctorApplyForm() {
   const { mutate: apply, isPending: applyPending } = useApplyAsDoctor();
 
   const form = useForm({
+    // defaultValues: {
+    //   name: "Mir Hussain",
+    //   email: "drmir@gmail.com",
+    //   phone: "01912345678",
+    //   address: "Neptune",
+    //   specialization: "Cardiologist",
+    //   licenseNumber: "ABC123",
+    //   qualifications: "MBBS",
+    //   experienceYears: "50",
+    //   consultationFee: "10000",
+    //   bio: "My life, my rules.",
+    //   resume: null as File | null,
+    //   additionalFiles: [] as File[],
+    // },
     defaultValues: {
-      name: "Mir Hussain",
-      email: "drmir@gmail.com",
-      phone: "01912345678",
-      address: "Neptune",
-      specialization: "Cardiologist",
-      licenseNumber: "ABC123",
-      qualifications: "MBBS",
-      experienceYears: "50",
-      consultationFee: "10000",
-      bio: "My life, my rules.",
+      name: "",
+      email: "",
+      phone: "",
+      address: "",
+      specialization: "",
+      licenseNumber: "",
+      qualifications: "",
+      experienceYears: "",
+      consultationFee: "",
+      bio: "",
       resume: null as File | null,
       additionalFiles: [] as File[],
+    },
+
+    validators: {
+      onSubmit: doctorApplicationSchema,
     },
 
     onSubmit: async ({ value }) => {
@@ -107,15 +124,28 @@ export default function DoctorApplyForm() {
         },
         {
           onSuccess: (res) => {
+            if (!res.success) {
+              toast.add({
+                title: "Server Failure",
+                description: "Something went wrong. Please try again",
+                type: "error",
+              });
+              return;
+            }
+
             toast.add({
-              title: "Apply Doctor successfully",
-              description: res.message || "Waiting for Admin Approval",
+              title: "Application Submitted",
+              description: "Please verify your account",
               type: "success",
             });
+            const params = new URLSearchParams({
+              email: doctorData.user.email,
+            });
+            router.push(`/apply/verify-account?${params.toString()}`);
           },
           onError: (err) => {
             toast.add({
-              title: "Apply Doctor failure",
+              title: "Application failure",
               description:
                 err.message || "Something went wrong. Please try again",
               type: "error",
@@ -495,15 +525,6 @@ export default function DoctorApplyForm() {
                       onChange={(e) => {
                         const selected = e.target.files?.[0] ?? null;
 
-                        if (
-                          selected &&
-                          (!isAcceptedFileSize(selected.size) ||
-                            !isAcceptedFileType(selected.type))
-                        ) {
-                          field.handleBlur();
-                          return;
-                        }
-
                         field.handleChange(selected);
                         e.target.value = "";
                       }}
@@ -547,7 +568,10 @@ export default function DoctorApplyForm() {
               return (
                 <Field data-invalid={isInvalid}>
                   <FieldLabel htmlFor="additional-file-field">
-                    Additional File
+                    Additional Files
+                    <span className="font-normal text-muted-foreground">
+                      (optional)
+                    </span>
                   </FieldLabel>
                   <div className="flex flex-wrap items-center gap-3">
                     <Button
@@ -571,19 +595,8 @@ export default function DoctorApplyForm() {
                           return;
                         }
 
-                        const invalid = incoming.some(
-                          (file) =>
-                            !isAcceptedFileSize(file.size) ||
-                            !isAcceptedFileType(file.type),
-                        );
-
-                        if (invalid) {
-                          field.handleBlur();
-                          e.target.value = "";
-                          return;
-                        }
-
                         field.handleChange([...files, ...incoming]);
+                        e.target.value = "";
                       }}
                     />
                     {files.length > 0 && (
@@ -630,8 +643,14 @@ export default function DoctorApplyForm() {
           </form.Field>
         </FieldGroup>
         <div className="flex justify-end w-full mt-5">
-          <Button type="submit" size="lg" disabled={applyPending}>
-            {applyPending ? "Submitting..." : "Submit"}
+          <Button disabled={applyPending} type="submit">
+            {applyPending ? (
+              <>
+                <Spinner /> submitting
+              </>
+            ) : (
+              "Submit"
+            )}
           </Button>
         </div>
       </form>
