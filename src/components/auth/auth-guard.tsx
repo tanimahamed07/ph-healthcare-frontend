@@ -12,6 +12,7 @@ export default function AuthGuard({ children }: { children: ReactNode }) {
 
   const user = data?.data;
 
+
   useEffect(() => {
     if (isPending) {
       return;
