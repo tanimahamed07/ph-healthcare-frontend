@@ -1,7 +1,13 @@
-import React from 'react'
+import DoctorApprovalTabs from "@/components/models/doctor-approval/doctor-approval-tabs";
 
-export default function ApprovedDoctorPage() {
+export default function page() {
   return (
-    <div>ApprovedDoctorPage</div>
-  )
+    <section className="p-5">
+      <div>
+        <h1> Doctor approval </h1>
+        <p>Please review and make sure the given data is real.</p>
+      </div>
+      <DoctorApprovalTabs />
+    </section>
+  );
 }
