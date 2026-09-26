@@ -2,9 +2,10 @@ import {
   applyAsDoctor,
   approveDoctor,
   getAllDoctors,
+  getAllPublicDoctors,
   verifyDoctorAccount,
 } from "@/api";
-import { DoctorParams } from "@/types";
+import { DoctorParams, PublicDoctorParams } from "@/types";
 import { useMutation, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 
 export function useApplyAsDoctor() {
@@ -36,5 +37,12 @@ export function useSuspenseGetAllDoctors(params: DoctorParams) {
 export function useApproveDoctor(params: DoctorParams) {
   return useMutation({
     mutationFn: approveDoctor,
+  });
+}
+
+export function useSuspenseGetPublicDoctors(params: PublicDoctorParams) {
+  return useSuspenseQuery({
+    queryKey: ["doctors", "public", params],
+    queryFn: () => getAllPublicDoctors(params),
   });
 }

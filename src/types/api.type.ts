@@ -12,3 +12,4 @@ export interface Meta {
   total: number;
   totalPages: number;
 }
+

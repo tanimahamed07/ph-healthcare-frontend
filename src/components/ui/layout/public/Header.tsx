@@ -10,8 +10,11 @@ import Link from "next/link";
 export default function Header() {
   const routes = [
     { name: "Home", url: "/" },
+    { name: "Doctors", url: "/doctors" },
     { name: "About us", url: "/about-us" },
   ];
+
+
 
   const { data, isLoading } = useGetMe();
   const { mutate: logout } = useLogout();

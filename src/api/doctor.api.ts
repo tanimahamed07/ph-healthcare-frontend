@@ -4,6 +4,8 @@ import {
   Doctor,
   DoctorApplicationPayload,
   DoctorParams,
+  PublicDoctorParams,
+  PublicDoctorProfile,
   VerifyAccountPayload,
 } from "@/types";
 import { ApiResponse } from "@/types/api.type";
@@ -42,4 +44,19 @@ export function approveDoctor(payload: ApproveDoctorPayload) {
     method: "POST",
     body: payload,
   });
+}
+
+export function getAllPublicDoctors(params: PublicDoctorParams) {
+  return apiClient<ApiResponse<PublicDoctorProfile[]>>(
+    "/doctor/public/all-doctors",
+    {
+      params,
+    },
+  );
+}
+
+export function getPublicDoctorProfile(doctorId: string) {
+  return apiClient<ApiResponse<PublicDoctorProfile>>(
+    `/doctor/public/${doctorId}`,
+  );
 }
