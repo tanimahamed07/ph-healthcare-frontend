@@ -20,6 +20,24 @@ import { Spinner } from "../ui/spinner";
 import Link from "next/link";
 import GoogleLoginComponent from "../ui/layout/modules/google-login/GoogleLogin";
 
+const demoCredentials = [
+  {
+    role: "Super Admin",
+    email: "superadmin@gmail.com",
+    password: "Super@admin12345",
+  },
+  {
+    role: "Admin",
+    email: "testeradmin@gmail.com",
+    password: "Tester@admin12345",
+  },
+  {
+    role: "Doctor",
+    email: "testerdoctor@gmail.com",
+    password: "Tester@doctor12345",
+  },
+];
+
 export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
@@ -28,8 +46,8 @@ export default function LoginForm() {
 
   const form = useForm({
     defaultValues: {
-      email: "superadmin@gmail.com",
-      password: "Super@admin12345",
+      email: "",
+      password: "",
     },
     validators: {
       onSubmit: loginSchema,
@@ -61,6 +79,11 @@ export default function LoginForm() {
     },
   });
 
+  const handleDemoLogin = (email: string, password: string) => {
+    form.setFieldValue("email", email);
+    form.setFieldValue("password", password);
+  };
+
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-col items-center gap-2 text-center">
@@ -71,6 +94,28 @@ export default function LoginForm() {
           Enter your email below to login to your account
         </p>
       </div>
+
+      {/* Demo Login Buttons */}
+      <div className="space-y-2">
+        <p className="text-xs text-muted-foreground text-center">
+          Quick Demo Login
+        </p>
+        <div className="grid grid-cols-3 gap-2">
+          {demoCredentials.map((demo) => (
+            <Button
+              key={demo.email}
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => handleDemoLogin(demo.email, demo.password)}
+            >
+              {demo.role}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      <FieldSeparator>Or enter credentials</FieldSeparator>
 
       <form
         onSubmit={(e) => {

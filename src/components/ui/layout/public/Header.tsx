@@ -14,11 +14,25 @@ export default function Header() {
     { name: "About us", url: "/about-us" },
   ];
 
-
-
   const { data, isLoading } = useGetMe();
   const { mutate: logout } = useLogout();
   const queryClient = useQueryClient();
+
+  const user = data?.data;
+
+  // Dashboard routes based on role
+  const getDashboardRoute = () => {
+    if (!user) return null;
+    const roleRoutes: Record<string, string> = {
+      SUPER_ADMIN: "/admin",
+      ADMIN: "/admin",
+      DOCTOR: "/doctor",
+      PATIENT: "/dashboard",
+    };
+    return roleRoutes[user.role] || null;
+  };
+
+  const dashboardRoute = getDashboardRoute();
 
   const handleLogout = () => {
     logout(undefined, {
@@ -55,7 +69,7 @@ export default function Header() {
             </Link>
           ))}
         </nav>
-        <div>
+        <div className="flex items-center gap-2">
           {!isLoading && !data && (
             <Button
               variant="outline"
@@ -66,9 +80,20 @@ export default function Header() {
             </Button>
           )}
           {!isLoading && data && (
-            <Button onClick={handleLogout} variant="destructive">
-              Logout
-            </Button>
+            <>
+              {dashboardRoute && (
+                <Button
+                  variant="outline"
+                  render={<Link href={dashboardRoute}>Dashboard</Link>}
+                  nativeButton={false}
+                >
+                  Dashboard
+                </Button>
+              )}
+              <Button onClick={handleLogout} variant="destructive">
+                Logout
+              </Button>
+            </>
           )}
         </div>
       </div>
